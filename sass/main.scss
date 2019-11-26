@@ -142,6 +142,9 @@ body {
     background-color: $dark-primary;
     position: relative;
     overflow: hidden;
+    
+    // fix for safari ios -> overflow now working on transition
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
 
     // simulating the fill on hover for testing purposes
     // &:hover {
