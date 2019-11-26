@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Waterly - Water tracker</title>
+
+  <!-- *** STYLING *** -->
+  <link href="https://fonts.googleapis.com/css?family=Dosis:400,700|Roboto+Mono&display=swap" rel="stylesheet"> 
+  <link rel="stylesheet" href="./css/main.min.css">
+</head>
+<body>
+  <main class="main">
+    <header class="header">
+      <button class="header__button js-open-info" aria-label="Show information.">
+        <!-- add content for accesibility -->
+      </button>
+
+      <img src="./assets/logo.svg" alt="Waterly." class="header__logo">
+    </header>
+
+    <section class="tracker">
+      <div class="tracker__glasses js-glasses-container">
+        <button class="glass js-glass-1" data-glass="0"></button>
+        <button class="glass js-glass-2" data-glass="1"></button>
+        <button class="glass js-glass-3" data-glass="2"></button>
+        <button class="glass js-glass-4" data-glass="3"></button>
+        <button class="glass js-glass-5" data-glass="4"></button>
+        <button class="glass js-glass-6" data-glass="5"></button>
+        <button class="glass js-glass-7" data-glass="6"></button>
+        <button class="glass js-glass-8" data-glass="7"></button>
+      </div>
+
+      <div class="tracker__progress js-progress-bar">
+
+      </div>
+    </section>
+
+    <section class="content js-content">
+      <p class="content__paragraph js-content-paragraph">
+        Take your first glass of water of the day, please...
+      </p>
+    </section>
+
+    <section class="info js-info-section">
+      info
+    </section>
+  </main>
+
+  <!-- *** scripting *** -->
+  <script src="./js/main.js"></script>
+</body>
+</html>
