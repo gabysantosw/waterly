@@ -8,6 +8,14 @@ infoButton.addEventListener('click', function () {
   infoButton.classList.toggle('--active');
 });
 
+// ALERT MESSAGE - hidding on button press
+const alert = document.querySelector('.js-alert');
+const closeAlert = document.querySelector('.js-close-alert');
+
+closeAlert.addEventListener('click', function () {
+  alert.classList.toggle('--show');
+});
+
 ////// === FUNCTIONALITY ===
 // the ui elements
 const progress = document.querySelector('.js-progress-bar');
@@ -21,21 +29,25 @@ const glassesUI = [
   document.querySelector('.js-glass-7'),
   document.querySelector('.js-glass-8')
 ];
+
 const content = document.querySelector('.js-content');
 const contentParagraph = document.querySelector('.js-content-paragraph');
 let timerParagraph = null;
 let timer = null;
+let timerWrapper = null;
 let hours = null;
 let minutes = null;
 let seconds = null;
+let currentTimer = 0;
 
 // keping track of the state of each glass
 let glassesArray = [false, false, false, false, false, false, false, false];
 let glassesAmount = 0;
+let lastGlassDate = null;
 let lastGlassAt = null;
 
 // utils
-const MS_IN_HOUR = 3600000;
+const MS_IN_HOUR = 5000;
 
 // initial setup
 function init() {
@@ -59,46 +71,56 @@ function glassClick(position) {
 
     let currently = new Date().getTime();
 
-    // check if this is the first glass 
-    // or if that no glass was drank in 2h
+    // check if this is the first glass of the day
     if (lastGlassAt === null) {
-      // first glass of the day
-
       // filling the glass
       glassesArray[position] = true;
       glassesUI[position].classList.toggle('--filled');
       glassesAmount++;
-      lastGlassAt = new Date().getTime();
+      lastGlassDate = new Date();
+      lastGlassAt = lastGlassDate.getTime();
 
       // updating the progress bar
       progress.classList.toggle(`--filled-${glassesAmount}`);
 
+      updateContent();
       startTimer();
+      saveLocally();
     } else {
       // check time since last glass
       timePassed = currently - lastGlassAt;
       
-
-      // check if at least 2h have passed
-      if (timePassed >= MS_IN_HOUR * 2) {
+      // check if at least 1h has passed
+      if (timePassed >= MS_IN_HOUR) {
          // filling the glass
         glassesArray[position] = true;
         glassesUI[position].classList.toggle('--filled');
         glassesAmount++;
-        lastGlassAt = new Date().getTime();
+        lastGlassDate = new Date();
+        lastGlassAt = lastGlassDate.getTime();
 
         // updating the progress bar
         progress.classList.toggle(`--filled-${glassesAmount}`);
 
+        updateContent();
         startTimer();
+        saveLocally();
       } else {
-        // send message to wait
+        // animation class -> headshake
+        glassesUI[position].classList.add('glass-headshake');
+
+        // remove class when animation ends
+        glassesUI[position].addEventListener('animationend', function(event) {
+          glassesUI[position].classList.remove('glass-headshake');
+        }, false);
+
+        // show alert message
+        alert.classList.toggle('--show');
       }
     }
 
   } else {
     // a filled glass was pressed
-
     // empting the glass
     glassesArray[position] = false;
     glassesUI[position].classList.toggle('--filled');
@@ -109,9 +131,10 @@ function glassClick(position) {
 
     // reset timer
     lastGlassAt = null;
+
+    updateContent();
+    saveLocally();
   }
-  
-  updateContent();
 }
 
 // updating the content section
@@ -149,6 +172,7 @@ function updateContent() {
         // create the content__timer
         let newTimer = document.createElement('span');
         newTimer.classList.add('content__timer');
+        newTimer.classList.add('js-timer-wrapper');
         
         // create the timer digits
         let newHour = document.createElement('span');
@@ -172,6 +196,7 @@ function updateContent() {
 
         // setting the UI
         timerParagraph = document.querySelector('.js-timer-paragraph');
+        timerWrapper = document.querySelector('.js-timer-wrapper');
         hours = document.querySelector('.js-hours');
         minutes = document.querySelector('.js-minutes');
         seconds = document.querySelector('.js-seconds');
@@ -192,7 +217,13 @@ function updateContent() {
     timerParagraph = null;
   }
 }
-let i = 0;
+
+// BREAKS THE TIMER ON FURTHER GLASSES
+function askToDrink() {
+  hours.innerText = '0h';
+  minutes.innerText = '00m'; 
+  seconds.innerText = '00s'; 
+}
 
 function startTimer() {
   let interval = setInterval(function() {   
@@ -205,6 +236,7 @@ function startTimer() {
 
     // stopping timer when the 2h passed
     if (timeLeft <= 1) {
+      // askToDrink();
       clearInterval(interval);
     }
     
@@ -230,5 +262,72 @@ function startTimer() {
   }, 1000);
 }
 
+// LOCAL STORAGE
+// WHAT NEEDS TO BE SAVED? -> glassesArray, glassesAmount -> NOT NEEDED IT WILL BE GOTTEN FROM glassesArray, lastGlassAt, currentTimer (if any)
+// IMPORTANT - localStorage only supports strings, arrays need to be JSON.strigify and parsed to use, same with dates but need Date.parse() instead
+// function saveLocally() {
+//   localStorage.setItem('array', JSON.stringify(glassesArray));
+//   localStorage.setItem('day', lastGlassDate.getDate());
+//   localStorage.setItem('timer', lastGlassAt);
+// }
+
+// function checkLocalStorage() {
+//   // check if there's anything saved in local storage
+//   if (localStorage.length > 1) {
+
+//     if (lastGlassAt !== null) {
+//       // clear localStorage if its a new day
+//       if(Date.parse(localStorage.getItem('day')) !== lastGlassDate.getDate()) {
+//         localStorage.clear();
+//       }
+//     } else {
+//       // type conversion of localStorage
+//       let savedArray = JSON.parse(localStorage.getItem('array'));
+//       let savedLast = Number(localStorage.getItem('last'));
+  
+//       // update ui if needed
+//       // filling glasses
+//       if (savedArray !== glassesArray) {
+//         // there's changes to be made
+//         for(let i = 0; i < savedArray.length; i++) {
+//           glassesArray[i] = savedArray[i];
+  
+//           if (glassesArray[i] === true) {
+//             // filling the glass
+//             glassesUI[i].classList.toggle('--filled');
+//             glassesAmount++;
+//             lastGlassAt = new Date().getTime();
+//           }
+//         }
+//       }
+
+//       // updating the progress bar
+//       progress.classList.toggle(`--filled-${glassesAmount}`);
+      
+//       // setting timer
+//       lastGlassAt = savedLast;
+//       // compare current date with lastGlassAt
+//       let currentTime = new Date().getTime();
+
+//       // total seconds passed
+//       let secondsPassed = (currentTime - lastGlassAt) / 1000;
+//       // 2 hours - seconds passed
+//       let timeLeft = (MS_IN_HOUR * 2 / 1000) - secondsPassed;
+
+//       updateContent();
+//       if (timeLeft >= 1) {
+//         startTimer();
+//       } else {
+//         askToDrink();
+//       }
+//     }
+//   }
+// }
+
 // initialization
-init();
+window.onload = function() {
+  // console.log(localStorage);
+  init();
+  // checkLocalStorage();
+};
+

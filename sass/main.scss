@@ -37,6 +37,40 @@ body {
   font-family: 'Dosis', sans-serif;
 }
 
+//// --- ANIMATIONS --- 
+.glass-headshake {
+  // with animation-iteration-count: 3;
+  animation: glass-headshake 100ms cubic-bezier(.4,.1,.6,.9) 3;
+}
+
+@keyframes glass-headshake {
+  $shake-intensity: 15%;
+  // initial transform
+  // transform: perspective(.5rem) rotateX(-2deg);
+
+  25% {
+    // move right
+    transform: 
+      perspective(.5rem) rotateX(-2deg)
+      translateX($shake-intensity);
+  }
+  75% {
+    // move left
+    transform: 
+      perspective(.5rem) rotateX(-2deg)
+      translateX(-$shake-intensity);
+  }
+}
+
+@keyframes progress-gradient {
+  0% {
+    transform: translateY(100%);
+  }
+  100%{
+    transform: translateY(-100%);
+  }
+}
+
 ////// === COMPONENTS ===
 .header {
   min-height: $header-height;
@@ -133,6 +167,9 @@ body {
     grid-template-rows: repeat(4, 1fr);
     justify-items: center;
     align-items: center;
+
+    // needed for &__message
+    position: relative;
   }
 
   &__progress {
@@ -156,9 +193,16 @@ body {
     // different filling states
     @for $i from 1 to 9 {
       &.--filled-#{$i} {
+        // the fill
         &::before {
           transform: scaleY($i * 0.125);
         }
+
+        // the animated gradient
+        // &::after {
+        //   opacity: .4;
+        //   animation: progress-gradient 2000ms linear forwards infinite;
+        // }
       }
     }
 
@@ -177,12 +221,108 @@ body {
       transform-origin: bottom;
       transition: transform 500ms ease-in-out;      
     }
+
+    // the animated gradient
+    // &::after {
+    //   content: '';
+    //   position: absolute;
+    //   display: block;
+    //   width: 100%;
+    //   height: 100%;
+    //   background: 
+    //     linear-gradient(
+    //       5deg,
+    //       transparent 0%, 
+    //       $dark-primary 40%,
+    //       $dark-primary 50%,
+    //       $dark-primary 60%,
+    //       transparent 100%
+    //     );
+
+    //   // initial state
+    //   opacity: 0;
+    // }
+  }
+
+  &__message {
+    position: absolute;
+
+    width: 80%;
+    height: 75%;
+    box-sizing: border-box;
+    padding: 2rem 1rem 1rem 1rem;
+    border-radius: $main-radius;
+    background-color: $dark-primary;
+    color: $light;
+    font-size: 1.125rem;
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    // initial state -> hidden
+    opacity: 0;
+    transform: scale(0);
+
+    &.--show {
+      opacity: 1;
+      transform: scale(1);
+
+      // placed here to avoid transition on page load
+      // downside -> no hiding transition
+      // the delays are to take into account glass headshake
+      $delay: 400ms;
+      transition: 
+        opacity 250ms 500ms ease-in-out,
+        transform 500ms 500ms ease-in-out;
+    }
+
+    // decorative ! icon on top
+    &::before {
+      $size: 2rem;
+      content: '!';
+      position: absolute;
+      top: -$size / 2;
+
+      width: $size;
+      height: $size;
+      border-radius: 50%;
+      background-color: $light;
+      color: $dark;
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Roboto Mono', monospace;
+      display: block;
+    }
+  }
+
+  &__paragraph {
+    max-width: 15ch; 
+    margin-bottom: 1rem;
+  }
+
+  &__message-button {
+    margin-top: .5rem;
+    padding: .5rem 1rem;
+    border-radius: 10rem;
+    background-color: $primary;
+    color: $dark;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
   }
 }
 
 .glass {
   position: relative;
   top: .5rem;
+
+  // win-w/h for responsivenes -> bigger glasses on bigger screens
+  // min-width: 40%;
+  // min-height: 60%;
+
   width: 3rem;
   height: 4rem;
   border-radius: .25rem;
@@ -196,6 +336,8 @@ body {
   position: relative;
   overflow: hidden;
 
+  transition: transform 250ms ease-in-out;
+
   // simulating the --filled on hover for testing purposes
   // &:hover {
   //   &::before {
@@ -204,6 +346,10 @@ body {
   // }
 
   &.--filled {
+    transform: 
+      perspective(.5rem) rotateX(-2deg)
+      scale(1.15);
+
     &::before {
       transform: scaleY(1.5);
     }
@@ -226,7 +372,8 @@ body {
     // initial state
     transform: scaleY(0);
     transform-origin: bottom;
-    transition: transform 500ms ease-in-out;
+    // aditional delay to give time for glass to scale
+    transition: transform 500ms 150ms ease-in-out;
   }
 }
 
@@ -236,7 +383,7 @@ body {
   border-radius: $main-radius;
   background-color: $dark-primary;
   color: $light;
-  font-size: 1rem;
+  font-size: 1.125rem;;
 
   display: flex;
   flex-direction: column;
@@ -261,15 +408,42 @@ body {
   height: $info-height;
   width: 100%;
   box-sizing: border-box;
-  padding: .5rem;
+  padding: 2rem;
   border-radius: $main-radius $main-radius 0 0;
   background-color: $light-dark;
   color: $light;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   
   transition: transform 500ms ease-in-out;
   
   &.--show {
     transform: translateY(calc(2rem - 100%));
+  }
+
+  &__paragraph {
+    width: 100%;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+  }
+}
+
+.footer {
+  margin-top: auto;
+  margin-bottom: 2rem;
+
+  width: 18ch;
+  color: $primary;
+  font-size: 1.125rem;
+  text-align: center;
+
+  &__link {
+    &:visited {
+      color: inherit;
+    }
+      text-decoration: underline;
   }
 }
 
