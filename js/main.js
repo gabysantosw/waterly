@@ -1,4 +1,5 @@
-////// === UI ===
+////// === BASE UI === //////
+
 // INFO SECTION - showing & hidding
 const infoButton = document.querySelector('.js-open-info');
 const infoSection = document.querySelector('.js-info-section');
@@ -16,9 +17,10 @@ closeAlert.addEventListener('click', function () {
   alert.classList.toggle('--show');
 });
 
-////// === FUNCTIONALITY ===
-// the ui elements
-const progress = document.querySelector('.js-progress-bar');
+////// === FUNCTIONALITY === //////
+
+////// UI ELEMENTS
+const glassesWrapper = document.querySelector('.js-glasses-wrapper');
 const glassesUI = [
   document.querySelector('.js-glass-1'),
   document.querySelector('.js-glass-2'),
@@ -29,83 +31,68 @@ const glassesUI = [
   document.querySelector('.js-glass-7'),
   document.querySelector('.js-glass-8')
 ];
-
-const content = document.querySelector('.js-content');
-const contentParagraph = document.querySelector('.js-content-paragraph');
-let timerParagraph = null;
+const progressBar = document.querySelector('.js-progress-bar');
+const messageWrapper = document.querySelector('.js-message-wrapper');
+const messageParagraph = document.querySelector('.js-message-paragraph');
+// elements that initially doesn't exist
+let messageTimerParagraph = null;
 let timer = null;
-let timerWrapper = null;
 let hours = null;
 let minutes = null;
 let seconds = null;
-let currentTimer = 0;
 
-// keping track of the state of each glass
-let glassesArray = [false, false, false, false, false, false, false, false];
+////// VARIABLES -> initial states
+let glassesArray = [
+  false, false,
+  false, false,
+  false, false,
+  false, false
+];
+let isTimerActive = false;
+let timePassed = null; 
 let glassesAmount = 0;
-let lastGlassDate = null;
 let lastGlassAt = null;
 
-// utils
-const MS_IN_HOUR = 5000;
+/////// CONSTANTS
+const MS_PER_HOUR = 2000;
 
-// initial setup
+////// SETUP
 function init() {
-  // listening for click events on the glasses container
-  document.querySelector('.js-glasses-container')
-    .addEventListener('click', function(event) {
-      // passing the data-glass value of the element
-      if (event.target.dataset.glass) {
-        // only running the function if the element has a data-glass
-        // because otherwise a glass wasn't pressed
-        glassClick(event.target.dataset.glass);
-      }
-    });
+  // listen for user clicks inside the glasses container
+  glassesWrapper.addEventListener('click', function (event) {
+    // check if it's a glass -> only the glasses have a data-glass attribute
+    if (event.target.dataset.glass) {
+      // pass the data-glass value (position) 
+      glassClick(event.target.dataset.glass);
+    }
+  });
 }
 
-// when a glass gets clicked
 function glassClick(position) {
+  // check if glass is empty -> glasses status are reflexted on glassesArray
+  if(glassesArray[position] === false) {
+    // -> glass is empty
 
-  if (glassesArray[position] === false) {
-    // an empty glass was pressed
+    // check if a timer is running
+    if (isTimerActive) {
+      // -> a timer is running
 
-    let currently = new Date().getTime();
+      // has more than 1h passed on that timer?
+      if (timePassed >= MS_PER_HOUR) {
+        // fill glass -> update data
+        fillGlass(position);
 
-    // check if this is the first glass of the day
-    if (lastGlassAt === null) {
-      // filling the glass
-      glassesArray[position] = true;
-      glassesUI[position].classList.toggle('--filled');
-      glassesAmount++;
-      lastGlassDate = new Date();
-      lastGlassAt = lastGlassDate.getTime();
+        // checking if its the last glass of the day
+        // if it is (glass 8) no need for timers
+        if (glassesAmount !== 8) {
+          // create timer message
+          createTimerMessage();
 
-      // updating the progress bar
-      progress.classList.toggle(`--filled-${glassesAmount}`);
-
-      updateContent();
-      startTimer();
-      saveLocally();
-    } else {
-      // check time since last glass
-      timePassed = currently - lastGlassAt;
-      
-      // check if at least 1h has passed
-      if (timePassed >= MS_IN_HOUR) {
-         // filling the glass
-        glassesArray[position] = true;
-        glassesUI[position].classList.toggle('--filled');
-        glassesAmount++;
-        lastGlassDate = new Date();
-        lastGlassAt = lastGlassDate.getTime();
-
-        // updating the progress bar
-        progress.classList.toggle(`--filled-${glassesAmount}`);
-
-        updateContent();
-        startTimer();
-        saveLocally();
+          // start timer
+          runTimer();
+        }
       } else {
+        // wait alert
         // animation class -> headshake
         glassesUI[position].classList.add('glass-headshake');
 
@@ -117,217 +104,258 @@ function glassClick(position) {
         // show alert message
         alert.classList.toggle('--show');
       }
+    } else {
+      // -> a timer is not running
+      // fill glass -> update data
+      fillGlass(position);
+
+      // checking if its the last glass of the day
+      // if it is (glass 8) no need for timers
+      if (glassesAmount !== 8) {
+        // create timer message
+        createTimerMessage();
+
+        // start timer
+        runTimer();
+      }
     }
 
   } else {
-    // a filled glass was pressed
-    // empting the glass
-    glassesArray[position] = false;
-    glassesUI[position].classList.toggle('--filled');
-    glassesAmount--;
-
-    // updating the progress bar
-    progress.classList.toggle(`--filled-${glassesAmount + 1}`);
-
-    // reset timer
-    lastGlassAt = null;
-
-    updateContent();
-    saveLocally();
+    // -> glass is filled
   }
 }
 
-// updating the content section
-function updateContent() {
-  let text = '';
-  let timerText = `Next glass in `
+function fillGlass(position, updateDate = false) {
+  // FUNCTIONAL SIDE
+  glassesArray[position] = true;
+  glassesAmount++;
+  saveLocalStorage();
+  
+  // to handle checkLocalStorage where the last glass at is already set
+  if (updateDate === false) {
+    lastGlassAt = new Date();
+  }
 
-  switch(glassesAmount) {
-    case 0:
-      text = `Take your first glass of water of the day, please... `;
-      break;
-    case 1:
-      // break;
-    case 2:
-      // break;
-    case 3:
-      // break;
-    case 4:
-      // break;
-    case 5:
-      // break;
-    case 6:
-      // break;
-    case 7:
-      text = `Feeling much better, right?`
+  // UI SIDE
+  glassesUI[position].classList.toggle('--filled');
+  // updating the progress bar
+  progressBar.classList.toggle(`--filled-${ glassesAmount }`);
+  // update message according to new ammount
+  updateMessage();
+}
 
-      // check if timer paragraph exists
-      if(timerParagraph === null) {
-        // doesnt exist -> create it
-        let newTimerParagraph = document.createElement('p');
-        newTimerParagraph.classList.add('js-timer-paragraph');
-        newTimerParagraph.classList.add('content__paragraph');
-        newTimerParagraph.textContent = timerText;
+// update message according to new ammount
+function updateMessage() {
+  if (glassesAmount === 0) {
+    messageParagraph.innerText = `Take your first glass of water of the day, please...`;
+    removeTimerMessage();
 
-        // create the content__timer
-        let newTimer = document.createElement('span');
-        newTimer.classList.add('content__timer');
-        newTimer.classList.add('js-timer-wrapper');
-        
-        // create the timer digits
-        let newHour = document.createElement('span');
-        newHour.classList.add('content__timer-element');
-        newHour.classList.add('js-hours');
-        newHour.textContent = '2h'
-        let newMinute = document.createElement('span');
-        newMinute.classList.add('content__timer-element');
-        newMinute.classList.add('js-minutes');
-        newMinute.textContent = '00m'
-        let newSecond = document.createElement('span');
-        newSecond.classList.add('content__timer-element');
-        newSecond.classList.add('js-seconds');
-        newSecond.textContent = '00s'
-        
-        newTimer.appendChild(newHour);
-        newTimer.appendChild(newMinute);
-        newTimer.appendChild(newSecond);
-        newTimerParagraph.appendChild(newTimer);
-        content.appendChild(newTimerParagraph);
+  } else if (glassesAmount === 8) {
+    messageParagraph.innerText = `Congratulations! You took your daily dosis of water today, good job!`
+    removeTimerMessage();
 
-        // setting the UI
-        timerParagraph = document.querySelector('.js-timer-paragraph');
-        timerWrapper = document.querySelector('.js-timer-wrapper');
-        hours = document.querySelector('.js-hours');
-        minutes = document.querySelector('.js-minutes');
-        seconds = document.querySelector('.js-seconds');
+  } else {
+    // glasses between 1-7
+    messageParagraph.innerText = `Feeling much better, right?`;
+  }
+}
+
+function removeTimerMessage() {
+  messageWrapper.removeChild(messageTimerParagraph);
+
+  // reseting ui variables
+  messageTimerParagraph = null;
+  timer = null;
+  hours = null;
+  minutes = null;
+  seconds = null;
+}
+
+// create timer message
+function createTimerMessage() {
+  // check if messageTimerParagraph was already created
+  if (messageTimerParagraph === null) {
+    // -> not created, create
+    let newMessageTimer = document.createElement('p');
+    newMessageTimer.classList.add('js-message-timer-paragraph');
+    newMessageTimer.classList.add('message__paragraph');
+    newMessageTimer.textContent = `Next glass in `;
+  
+    // append to parent
+    messageWrapper.appendChild(newMessageTimer);
+  
+    // updating element's reference
+    messageTimerParagraph = document.querySelector('.js-message-timer-paragraph');
+  }
+
+  // check if timer element exist
+  if (timer === null) {
+    // doesn't exist, create
+    let newTimer = document.createElement('span');
+    newTimer.classList.add('message__timer');
+    newTimer.classList.add('js-timer');
+    
+    // append to parent
+    messageTimerParagraph.appendChild(newTimer);
+  
+    // updating element's reference
+    timer = document.querySelector('.js-timer');
+  }
+
+  // check if hours/minutes/seconds elements exists
+  if (hours === null || minutes === null || seconds === null) {
+    // remove innerText in case there's any
+    timer.innerText = '';
+
+    // they dont exist, create them
+    let newHour = document.createElement('span');
+    newHour.classList.add('message__timer-element');
+    newHour.classList.add('js-hours');
+    newHour.textContent = '2h'
+    let newMinute = document.createElement('span');
+    newMinute.classList.add('message__timer-element');
+    newMinute.classList.add('js-minutes');
+    newMinute.textContent = '00m'
+    let newSecond = document.createElement('span');
+    newSecond.classList.add('message__timer-element');
+    newSecond.classList.add('js-seconds');
+    newSecond.textContent = '00s';
+  
+    // append to parent 
+    timer.appendChild(newHour);
+    timer.appendChild(newMinute);
+    timer.appendChild(newSecond);
+  
+    // updating element's reference
+    hours = document.querySelector('.js-hours');
+    minutes = document.querySelector('.js-minutes');
+    seconds = document.querySelector('.js-seconds');
+  }
+}
+
+function timeOverMessage() {
+  timer.innerText = `... right now, hurry!`;
+
+  // reseting the ui variables so they can be created when needed
+  hours = null;
+  minutes = null;
+  seconds = null;
+}
+
+function runTimer() {
+  // for each second
+  let interval = setInterval(function() {
+    let currentDate = new Date();
+
+    // passed time in ms since filled glass
+    passedTime = currentDate.getTime() - lastGlassAt.getTime();
+
+    // setting timer to 2h and converting passedTime to seconds
+    let timeLeft = (MS_PER_HOUR * 2 / 1000) - (passedTime / 1000);
+
+    // check if timer has ended -> passed time in seconds > 1 second
+    if (timeLeft < 0) {
+      // -> timer has ended
+      isTimerActive = false;
+      // update timer message: ask user to drink
+      timeOverMessage();
+
+      clearInterval(interval);
+      
+    } else {
+      // -> timer is active
+      isTimerActive = true;
+      
+      // ang getting time left in h m s
+      let hoursLeft = Math.floor((timeLeft / (60 * 60) ) % 24);
+      let minutesLeft = Math.floor((timeLeft / 60) % 60 );
+      let secondsLeft = Math.floor(timeLeft % 60);
+
+      // display the timer
+      hours.innerText = `${ hoursLeft }h`;
+
+      if (minutesLeft < 10) {
+        minutes.innerText = `0${ minutesLeft }m`;
       } else {
-        // only update the timer
+        minutes.innerText = `${ minutesLeft }m`;
       }
 
-      break;
-    case 8:
-      text = `Congratulations! You took your daily dosis of water today, good job! `
-      break;
-  }
-
-  // updating the content of the paragraphs
-  contentParagraph.textContent = text;
-  if (glassesAmount === 0 || glassesAmount === 8) {
-    content.removeChild(timerParagraph);
-    timerParagraph = null;
-  }
-}
-
-// BREAKS THE TIMER ON FURTHER GLASSES
-function askToDrink() {
-  hours.innerText = '0h';
-  minutes.innerText = '00m'; 
-  seconds.innerText = '00s'; 
-}
-
-function startTimer() {
-  let interval = setInterval(function() {   
-    let currentTime = new Date().getTime();
-
-    // total seconds passed
-    let secondsPassed = (currentTime - lastGlassAt) / 1000;
-    // 2 hours - seconds passed
-    let timeLeft = (MS_IN_HOUR * 2 / 1000) - secondsPassed;
-
-    // stopping timer when the 2h passed
-    if (timeLeft <= 1) {
-      // askToDrink();
-      clearInterval(interval);
-    }
-    
-    // converting the seconds in h m s
-    let hoursLeft = Math.floor( (timeLeft / (60 * 60)) % 24);
-    let minutesLeft = Math.floor( (timeLeft / 60) % 60 );
-    let secondsLeft = Math.floor(timeLeft % 60);
-  
-    // display result  
-    hours.innerText = hoursLeft + 'h';
-
-    if (minutesLeft < 10) {
-      minutes.innerText = '0' + minutesLeft + 'm';
-    } else {
-      minutes.innerText = minutesLeft + 'm';
+      if (secondsLeft < 10) {
+        seconds.innerText = `0${ secondsLeft }s`;
+      } else {
+        seconds.innerText = `${ secondsLeft }s`;
+      }
     }
 
-    if (secondsLeft < 10) {
-      seconds.innerText = '0' + secondsLeft + 's';
-    } else {
-      seconds.innerText = secondsLeft + 's';
-    }
   }, 1000);
 }
 
-// LOCAL STORAGE
-// WHAT NEEDS TO BE SAVED? -> glassesArray, glassesAmount -> NOT NEEDED IT WILL BE GOTTEN FROM glassesArray, lastGlassAt, currentTimer (if any)
-// IMPORTANT - localStorage only supports strings, arrays need to be JSON.strigify and parsed to use, same with dates but need Date.parse() instead
-// function saveLocally() {
-//   localStorage.setItem('array', JSON.stringify(glassesArray));
-//   localStorage.setItem('day', lastGlassDate.getDate());
-//   localStorage.setItem('timer', lastGlassAt);
-// }
+////// === LOCAL STORAGE === //////
 
-// function checkLocalStorage() {
-//   // check if there's anything saved in local storage
-//   if (localStorage.length > 1) {
+// LOCALSTORAGE NEEDS
+// glassesArray -> to properly show the filled arrays
+// lastGlassAt -> to get when was the last glass taken
 
-//     if (lastGlassAt !== null) {
-//       // clear localStorage if its a new day
-//       if(Date.parse(localStorage.getItem('day')) !== lastGlassDate.getDate()) {
-//         localStorage.clear();
-//       }
-//     } else {
-//       // type conversion of localStorage
-//       let savedArray = JSON.parse(localStorage.getItem('array'));
-//       let savedLast = Number(localStorage.getItem('last'));
-  
-//       // update ui if needed
-//       // filling glasses
-//       if (savedArray !== glassesArray) {
-//         // there's changes to be made
-//         for(let i = 0; i < savedArray.length; i++) {
-//           glassesArray[i] = savedArray[i];
-  
-//           if (glassesArray[i] === true) {
-//             // filling the glass
-//             glassesUI[i].classList.toggle('--filled');
-//             glassesAmount++;
-//             lastGlassAt = new Date().getTime();
-//           }
-//         }
-//       }
 
-//       // updating the progress bar
-//       progress.classList.toggle(`--filled-${glassesAmount}`);
-      
-//       // setting timer
-//       lastGlassAt = savedLast;
-//       // compare current date with lastGlassAt
-//       let currentTime = new Date().getTime();
+//     - YES -> update ui
+//       - check glassesArray
+//         - fill the ones with true
+//       - get amount of glasses from it
+//         - fill the progress bar
+//         - update message
+//       - compare lastGlassAt to get passedTime
+//       - is passedTime < 1?
+//         - YES -> activeTimer = true
+//         - NO -> timer has ended
+//           - activeTimer = false
+//           - passedTime = null;
 
-//       // total seconds passed
-//       let secondsPassed = (currentTime - lastGlassAt) / 1000;
-//       // 2 hours - seconds passed
-//       let timeLeft = (MS_IN_HOUR * 2 / 1000) - secondsPassed;
+//
 
-//       updateContent();
-//       if (timeLeft >= 1) {
-//         startTimer();
-//       } else {
-//         askToDrink();
-//       }
-//     }
-//   }
-// }
+function saveLocalStorage() {
+  localStorage.setItem('array', JSON.stringify(glassesArray));
+  localStorage.setItem('date', lastGlassAt);
+}
 
-// initialization
+function checkLocalStorage() {
+  // check if the local storage contains anything
+  if (localStorage.length > 1) {
+    let localDate = new Date(localStorage.getItem('date'));
+    let currentDay = new Date();
+
+    // check if the data is from today
+    if(localDate.getDate() === currentDay.getDate()) {
+      // -> localStorage is from today
+      // update variables to the ones in localStorage
+      glassesArray = JSON.parse(localStorage.getItem('array'));
+      lastGlassAt = localDate;
+
+      // fill glasses acordingly and update glassesAmount
+      for (let i = 0; i < glassesArray.length; i++) {
+        if (glassesArray[i] === true) {
+          fillGlass(i, true);
+        }
+      }
+
+      // checking if its the last glass of the day
+      // if it is (glass 8) no need for timers
+      if (glassesAmount !== 8) {
+        // create timer message
+        createTimerMessage();
+
+        // start timer
+        runTimer();
+      }
+
+    } else {
+      // -> localStorage is from another day
+      localStorage.clear();
+    }
+  }
+}
+
+////// === INITIALIZATION === //////
 window.onload = function() {
-  // console.log(localStorage);
   init();
-  // checkLocalStorage();
+  checkLocalStorage();
 };
-
