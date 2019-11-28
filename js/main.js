@@ -54,7 +54,7 @@ let glassesAmount = 0;
 let lastGlassAt = null;
 
 /////// CONSTANTS
-const MS_PER_HOUR = 360000;
+const MS_PER_HOUR = 3600000;
 
 ////// SETUP
 function init() {
