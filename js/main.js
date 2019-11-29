@@ -129,12 +129,14 @@ function fillGlass(position, updateDate = false) {
   // FUNCTIONAL SIDE
   glassesArray[position] = true;
   glassesAmount++;
-  saveLocalStorage();
   
   // to handle checkLocalStorage where the last glass at is already set
   if (updateDate === false) {
     lastGlassAt = new Date();
   }
+  
+  // saving glassesArray and lastGlassAt in localStorage
+  saveLocalStorage();
 
   // UI SIDE
   glassesUI[position].classList.toggle('--filled');
