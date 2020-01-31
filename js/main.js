@@ -34,7 +34,7 @@ const glassesUI = [
 const progressBar = document.querySelector('.js-progress-bar');
 const messageWrapper = document.querySelector('.js-message-wrapper');
 const messageParagraph = document.querySelector('.js-message-paragraph');
-// elements that initially doesn't exist
+// elements that initially doesn't 'exist'
 let messageTimerParagraph = null;
 let timer = null;
 let hours = null;

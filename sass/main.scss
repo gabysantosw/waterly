@@ -15,9 +15,18 @@ $header-height: 2.75rem;
 $info-height: calc(100vh - #{ $header-height });
 $main-radius: .5rem;
 
+// breakpoints
+$switch: 32rem;
+
 //// --- FUNCTIONS ---
 
 //// --- MIXINS ---
+
+@mixin size-switch {
+  @media screen and (min-width: $switch) {
+    @content;
+  }
+}
 
 ////// === BASE ===
 
@@ -29,6 +38,7 @@ body, p {
 button {
   border: none;
   padding: 0;
+  cursor: pointer;
 }
 
 //// --- BASE ---
@@ -161,6 +171,7 @@ body {
   $tracker-radius: 2rem;
 
   height: 100%;
+  max-height: 42rem;
   box-sizing: border-box;
   border-radius: $tracker-radius;
   margin: 1rem 0;
@@ -260,10 +271,8 @@ body {
   &__alert {
     position: absolute;
 
-    width: 80%;
-    min-height: 75%;
     box-sizing: border-box;
-    padding: 2rem 1rem 1rem 1rem;
+    padding: 3em 2em 2em 2em;
     border-radius: $main-radius;
     background-color: $dark-primary;
     color: $light;
@@ -278,6 +287,10 @@ body {
     // initial state -> hidden
     opacity: 0;
     transform: scale(0);
+
+    @include size-switch {
+      font-size: 1.5rem;
+    }
 
     &.--show {
       opacity: 1;
@@ -322,9 +335,13 @@ body {
     border-radius: 10rem;
     background-color: $primary;
     color: $dark;
-    font-size: 1rem;
+    font-size: inherit;
     font-weight: 700;
     font-family: inherit;
+
+    &:hover {
+      opacity: .5;
+    }
   }
 }
 
@@ -343,7 +360,8 @@ body {
   background-image: url(../assets/empty.svg);
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 1px 1px 1px $dark;
+  box-shadow: inset 0 0 3px $light-dark;
+
   // turning it into a trapezoid
   transform: perspective(.5rem) rotateX(-2deg);
   position: relative;
@@ -352,7 +370,9 @@ body {
   // fix for safari ios -> overflow now working on transition
   mask-image: radial-gradient(white, black);
 
-  transition: transform 250ms ease-in-out;
+  transition: 
+    transform 250ms ease-in-out,
+    opacity 250ms ease-in-out;
 
   // simulating the --filled on hover for testing purposes
   // &:hover {
@@ -361,13 +381,17 @@ body {
   //   }
   // }
 
+  &:hover {
+    opacity: .5;
+  }
+
   &.--filled {
     transform: 
       perspective(.5rem) rotateX(-2deg)
       scale(1.15);
 
     &::before {
-      transform: scaleY(1.5);
+      transform: scaleY(1.5) perspective(0) rotateX(0deg);
     }
   }
   
@@ -384,10 +408,12 @@ body {
     background-size: 60%;
     background-position: 50% 25%;
     background-repeat: no-repeat;
+    box-shadow: inset 0 0 5px $light-dark;
 
     // initial state
     transform: scaleY(0);
     transform-origin: bottom;
+
     // aditional delay to give time for glass to scale
     transition: transform 500ms 150ms ease-in-out;
   }
@@ -405,6 +431,11 @@ body {
   flex-direction: column;
   justify-content: space-around;
 
+  @include size-switch {
+    font-size: 1.5rem;
+    padding: 1rem;
+  }
+
 
   &__timer {
     color: $primary;
@@ -415,8 +446,12 @@ body {
   }
 
   &__timer-element {
-    font-size: 1.125rem;
+    font-size: inherit;
     margin-left: .25rem;
+
+    @include size-switch {
+      font-size: 1.5rem;
+    }
   }
 }
 
