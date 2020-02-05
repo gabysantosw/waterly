@@ -167,9 +167,7 @@ body {
   }
 
   &__logo {
-    @include size-switch {
-      width: 8rem;
-    }
+    width: 8rem;
   }
 }
 
@@ -370,15 +368,14 @@ body {
   background-image: url(../assets/empty.svg);
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: inset 0 0 3px $light-dark;
+  box-shadow: 0 0 1px $dark;
 
   // turning it into a trapezoid
   transform: perspective(.5rem) rotateX(-2deg);
-  position: relative;
-  overflow: hidden;
+  // overflow: hidden;
 
   // fix for safari ios -> overflow now working on transition
-  mask-image: radial-gradient(white, black);
+  // mask-image: radial-gradient(white, black);
 
   transition: 
     transform 250ms ease-in-out,
@@ -399,7 +396,35 @@ body {
   &:hover {
     opacity: .5;
   }
+  
+  // the fill
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
 
+    width: 100%;
+    height: 100%;
+    border-radius: .25rem;
+    background-color: $primary;
+    background-image: url(../assets/filled.svg);
+    background-size: 60%;
+    background-position: 50% 45%;
+    background-repeat: no-repeat;
+    box-shadow: 0 0 1px $primary;
+
+
+    // initial state
+    transform: scaleY(0) scaleX(.8);
+    transform-origin: bottom;
+
+    // aditional delay to give time for glass to scale
+    transition: transform 500ms 150ms ease-in-out;
+  }
+
+  // filled state
   &.--filled {
     cursor: default;
     transform: 
@@ -411,35 +436,13 @@ body {
     }
 
     &::before {
-      transform: scaleY(1.5) perspective(0) rotateX(0deg);
+      transform: scale(1);
     }
-  }
-  
-  // the fill
-  &::before {
-    content: '';
-    position: absolute;
-    display: block;
-
-    width: 100%;
-    height: 100%;
-    background-color: $primary;
-    background-image: url(../assets/filled.svg);
-    background-size: 60%;
-    background-position: 50% 25%;
-    background-repeat: no-repeat;
-
-    // initial state
-    transform: scaleY(0);
-    transform-origin: bottom;
-
-    // aditional delay to give time for glass to scale
-    transition: transform 500ms 150ms ease-in-out;
   }
 }
 
 .message {
-  padding: .5rem 1rem;
+  padding: 1rem;
   border-radius: $main-radius;
   background-color: $dark-primary;
   color: $light;
@@ -458,7 +461,7 @@ body {
     &--timer {
       margin-top: .5em;
       color: $neutro;
-      font-size: .8em;
+      font-size: .95em;
       text-align: right;
     }
   }
@@ -467,7 +470,7 @@ body {
     display: inline-block;
     width: 6.75em;
     color: $primary;
-    font-size: .9em;
+    font-size: .95em;
     font-family: 'Roboto Mono', monospace;
     text-align: center;
 
