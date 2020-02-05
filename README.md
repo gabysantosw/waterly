@@ -1,86 +1,33 @@
-# Waterly
+# v1
 
----
+Goals: refactor current app 
 
-## User flow
+Completed:
 
-INITIALS:
-MS_PER_HOUR = 360000
-activeTimer = false -> keeps track if there's an active timer
-glassesAmount = 0 -> keeps track of amount of glasses
-glassesArray = [ -> abstract representation of each glass state
-  false, false,
-  false, false,
-  false, false,
-  false, false
-;]
-lastGlassAt -> to save the date of last tracked glass
-passedTime = null; -> to track passed time if there's an active timer
+## Steps
 
-- User clicks
-- is it a glass?
-  - YES -> is it empty?
-    - YES -> is there an active timer?
-      - YES -> has more than 1h passed?
-        - YES -> fill glass
-            - update glassesArray and glassesUI
-            - glassesAmount++
-            - save current time in lastGlassAt
-          - update message
-          - start timer INTERVAL EACH SECOND
-            - create timer message
-            - get currentTime
-            - compare lastGlassAt to get passedTime
-            - is passedTime < 1?
-              - YES -> activeTimer = true
-                - update hours / minutes / seconds
-              - NO -> timer has ended
-                - activeTimer = false
-                - passedTime = null;
-                - update timer message: ask user to drink
-        - NO -> wait alert
-      - NO -> fill glass
-            - update glassesArray and glassesUI
-            - glassesAmount++
-            - save current time in lastGlassAt
-          - update message
-            - is amount 0?
-              - YES -> ask to drink first glass
-              - NO -> is amount 8?
-                - YES -> congratulate from filling
-                - NO -> add message
-                  - add timer message
-          - start timer INTERVAL EACH SECOND
-            - get currentTime
-            - compare lastGlassAt to get passedTime
-            - is passedTime < 1?
-              - YES -> activeTimer = true
-              - NO -> timer has ended
-                - activeTimer = false
-                - passedTime = null;
-                - in timer message: ask user to drink
-    - NO -> empty the glass
-      - restart timer
-- NO -> do nothing
+USER STORIES:
+- As an USER i should click BUTTON to add a glass of water
+- i can log another glass after 1h of the last one
+- goal is to drink 8 glasses through the day
+- remind me to drink if i havent done so in 2h
+- should reset each day
+- visualize current glasses amount
 
-LOCALSTORAGE NEEDS
-glassesArray -> to properly show the filled arrays
-lastGlassAt -> to get when was the last glass taken
+CONSTANTS:
+GOAL_AMOUNT = 8;
+MIN_TIME_SINCE = 1h;
+MAX_TIME_SINCE = 2h;
 
-ON LOAD
-- is there something in the local storage?
-  - YES -> is the data from TODAY?
-    - YES -> update ui
-      - check glassesArray
-        - fill the ones with true
-      - get amount of glasses from it
-        - fill the progress bar
-        - update message
-      - compare lastGlassAt to get passedTime
-      - is passedTime < 1?
-        - YES -> activeTimer = true
-        - NO -> timer has ended
-          - activeTimer = false
-          - passedTime = null;
-    - NO -> clear storage
-  - NO -> do nothing
+STATES:
+glasses abstraction
+last glass time
+
+EVENTS:
+group of button classes
+
+FUNCTIONS:
+is new day? reset
+has min time passed? allow drink
+has max time passed? remind drink
+goal amount reached? congrats

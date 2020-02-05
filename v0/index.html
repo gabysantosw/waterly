@@ -9,60 +9,53 @@
   <!-- *** STYLING *** -->
   <link href="https://fonts.googleapis.com/css?family=Dosis:400,700|Roboto+Mono&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="./css/main.min.css">
-
-  
-  <!-- *** SCRIPTING *** -->
-  <script defer src="./js/main.js"></script>
 </head>
 <body>
   <main class="main">
     <header class="header">
-      <button id="js-open-info" class="header__button" aria-label="Show information.">
+      <button class="header__button js-open-info" aria-label="Show information.">
         <!-- TODO: add content for accesibility -->
       </button>
 
       <img src="./assets/logo.svg" alt="Waterly." class="header__logo">
     </header>
 
-    <section
-    class="tracker">
-      <div id="js-glasses" class="tracker__glasses">
-        <button class="glass" data-position="0"></button>
-        <button class="glass" data-position="1"></button>
-        <button class="glass" data-position="2"></button>
-        <button class="glass" data-position="3"></button>
-        <button class="glass" data-position="4"></button>
-        <button class="glass" data-position="5"></button>
-        <button class="glass" data-position="6"></button>
-        <button class="glass" data-position="7"></button>
+    <section class="tracker">
+      <div class="tracker__glasses js-glasses-wrapper">
+        <button class="glass js-glass-1" data-glass="0"></button>
+        <button class="glass js-glass-2" data-glass="1"></button>
+        <button class="glass js-glass-3" data-glass="2"></button>
+        <button class="glass js-glass-4" data-glass="3"></button>
+        <button class="glass js-glass-5" data-glass="4"></button>
+        <button class="glass js-glass-6" data-glass="5"></button>
+        <button class="glass js-glass-7" data-glass="6"></button>
+        <button class="glass js-glass-8" data-glass="7"></button>
 
-        <div id="js-alert" class="tracker__alert">
+        <div class="tracker__alert js-alert">
           <div class="tracker__paragraph">
             You can’t fill another glass until at least an hour has passed since your last one.
           </div>
           <div class="tracker__paragraph">
             Why? The goal is to drink through the entire day.
           </div>
-          <button id="js-close-alert" class="tracker__alert-button">
+          <button class="tracker__alert-button js-close-alert">
             Oh, okay!
           </button>
         </div>
       </div>
 
-      <div id="js-progress-bar" class="tracker__progress"></div>
+      <div class="tracker__progress js-progress-bar">
+
+      </div>
     </section>
 
-    <section class="message">
-      <p id="js-message"class="message__paragraph">
+    <section class="message js-message-wrapper">
+      <p class="message__paragraph js-message-paragraph">
         Take your first glass of water of the day, please...
       </p>
-      <p id="js-timer-message" class="message__paragraph message__paragraph--timer">
-        Next glass in: 
-        <span id="js-timer" class="message__timer">... Now!</span>
-      </p>
     </section>
 
-    <section id="js-info-section" class="info">
+    <section class="info js-info-section">
       <p class="info__paragraph">
         Each glass recommended intake is about 250ml.
       </p>
@@ -87,5 +80,7 @@
     </section>
   </main>
 
+  <!-- *** scripting *** -->
+  <script src="./js/main.js"></script>
 </body>
 </html>
